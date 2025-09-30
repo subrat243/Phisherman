@@ -538,3 +538,24 @@ This tool is designed to help detect phishing attempts but should not be solely 
 ---
 
 **Made with ❤️ for a safer internet**
+---
+
+## ⚠️ IMPORTANT: Disk Space & Installation
+
+### 💾 Running Out of Disk Space?
+
+**Use the lightweight core requirements instead!**
+
+```bash
+# Clear pip cache first (saves 3-4GB)
+pip cache purge
+
+# Install core requirements only (200MB instead of 2GB)
+pip install --break-system-packages -r requirements-core.txt --no-cache-dir
+```
+
+**Why?** The full `requirements.txt` includes CUDA packages (2-3GB) that are NOT needed for phishing detection!
+
+See [DISK_SPACE_FIX.md](DISK_SPACE_FIX.md) for complete details.
+
+---

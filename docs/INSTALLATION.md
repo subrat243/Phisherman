@@ -72,7 +72,7 @@ pip install --break-system-packages email-validator
 pip install --break-system-packages xgboost lightgbm
 ```
 
-**If installation fails or gets killed**: Skip this step. You can still use rule-based detection without these libraries.
+**If installation fails or gets killed**: Skip this step. You can still use rule-based detection without these libraries Or Install dependencies one by one manually.
 
 #### Step 3: Download NLTK Data
 
