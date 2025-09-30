@@ -312,7 +312,7 @@ class PhishingCLI:
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
-        description="AI-Powered Phishing Detection Tool",
+        description="Phisherman - AI-Powered Phishing Detection Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -358,7 +358,7 @@ Examples:
 
     # Display banner
     print("\n" + "=" * 70)
-    print("🛡️  AI-POWERED PHISHING DETECTION TOOL")
+    print("🛡️ Phisherman - AI-POWERED PHISHING DETECTION TOOL")
     print("=" * 70)
 
     # Initialize CLI

@@ -40,9 +40,11 @@ echo -e "${GREEN}"
 cat << "EOF"
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║     🛡️  AUTO PHISHING DETECTION TOOL - SETUP 🛡️          ║
+║      🛡️  AUTO PHISHING DETECTION TOOL - SETUP 🛡️            ║
 ║                                                           ║
-║           AI-Powered Phishing Protection System          ║
+║                       PHISHERMAN                          ║
+║                                                           ║
+║         AI-Powered Phishing Protection System             ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
 EOF
@@ -93,16 +95,35 @@ source venv/bin/activate
 
 # Upgrade pip
 print_header "Upgrading pip"
-pip install --upgrade pip setuptools wheel
+pip install --upgrade pip setuptools wheel --break-system-packages
 print_success "pip upgraded"
 
 # Install dependencies
 print_header "Installing Python Dependencies"
 print_info "This may take several minutes..."
+print_warning "Installing with --break-system-packages flag"
 
 if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt
-    print_success "All dependencies installed"
+    # Install core dependencies first
+    print_info "Installing core ML libraries..."
+    pip install --break-system-packages numpy pandas scikit-learn joblib tqdm colorama 2>&1 | grep -E "Successfully installed|ERROR" || true
+
+    print_info "Installing web/API frameworks..."
+    pip install --break-system-packages fastapi uvicorn requests beautifulsoup4 lxml 2>&1 | grep -E "Successfully installed|ERROR" || true
+
+    print_info "Installing feature extraction libraries..."
+    pip install --break-system-packages tldextract python-whois dnspython validators 2>&1 | grep -E "Successfully installed|ERROR" || true
+
+    print_info "Installing utilities..."
+    pip install --break-system-packages python-dotenv pyyaml nltk loguru email-validator 2>&1 | grep -E "Successfully installed|ERROR" || true
+
+    print_info "Installing security libraries..."
+    pip install --break-system-packages cryptography pyOpenSSL certifi aiohttp 2>&1 | grep -E "Successfully installed|ERROR" || true
+
+    print_info "Installing optional ML frameworks (may take longer)..."
+    pip install --break-system-packages xgboost lightgbm 2>&1 | grep -E "Successfully installed|ERROR|Killed" || print_warning "ML frameworks installation failed - you can still use rule-based detection"
+
+    print_success "Core dependencies installed"
 else
     print_error "requirements.txt not found"
     exit 1
@@ -245,19 +266,23 @@ EOF
 echo -e "${NC}"
 
 echo -e "\n${BLUE}Next Steps:${NC}\n"
-echo "1. Activate the virtual environment:"
-echo -e "   ${YELLOW}source venv/bin/activate${NC}\n"
+echo "1. Activate the virtual environment (if using venv):"
+echo -e "   ${YELLOW}source venv/bin/activate${NC}"
+echo -e "   ${YELLOW}# Or use system Python with installed packages${NC}\n"
 
-echo "2. Collect data and train models:"
-echo -e "   ${YELLOW}python train.py --collect-data${NC}\n"
-
-echo "3. Start the API server:"
-echo -e "   ${YELLOW}python api/main.py${NC}\n"
-
-echo "4. Use the CLI tool:"
+echo "2. Test immediately (no training needed):"
 echo -e "   ${YELLOW}python detect.py -u https://example.com${NC}\n"
 
-echo "5. Or try interactive mode:"
+echo "3. Collect data and train models (optional, requires ML libraries):"
+echo -e "   ${YELLOW}python train.py --collect-data${NC}\n"
+
+echo "4. Start the API server:"
+echo -e "   ${YELLOW}python api/main.py${NC}\n"
+
+echo "5. Use the CLI tool:"
+echo -e "   ${YELLOW}python detect.py -u https://example.com${NC}\n"
+
+echo "6. Or try interactive mode:"
 echo -e "   ${YELLOW}python detect.py -i${NC}\n"
 
 echo -e "${BLUE}Additional Resources:${NC}\n"
@@ -270,6 +295,6 @@ echo -e "\n${GREEN}Happy Phishing Detection! 🛡️${NC}\n"
 # Deactivate virtual environment
 deactivate
 
-echo -e "${YELLOW}Note: Virtual environment has been deactivated.${NC}"
-echo -e "${YELLOW}Remember to activate it before running the tools:${NC}"
-echo -e "${YELLOW}source venv/bin/activate${NC}\n"
+echo -e "${YELLOW}Note: Packages installed with --break-system-packages flag.${NC}"
+echo -e "${YELLOW}You can run tools directly with system Python or activate venv.${NC}"
+echo -e "${YELLOW}If xgboost/lightgbm failed to install, use rule-based detection.${NC}\n"

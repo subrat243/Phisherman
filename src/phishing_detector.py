@@ -277,13 +277,20 @@ class PhishingDetector:
             "has_suspicious_tld": 12.0,
             "has_embedded_domain": 15.0,
             "has_https": -10.0,  # negative = good
-            "has_valid_cert": -10.0,
             "domain_age_months": -0.5,  # per month (negative = good)
             "num_hyphens": 3.0,  # per hyphen over 1
             "num_underscores": 4.0,
             "num_params": 2.0,  # per parameter over 2
             "has_port": 8.0,
             "domain_has_digits": 7.0,
+        }
+
+        # Special handling for SSL certificate
+        # Don't penalize heavily for SSL issues as they could be temporary/network issues
+        ssl_weights = {
+            1.0: -10.0,   # Valid cert = bonus
+            0.5: 0.0,     # Uncertain = neutral (network/temp issues)
+            0.0: 5.0,     # No cert (HTTP) = slight penalty
         }
 
         # Base score
@@ -309,6 +316,9 @@ class PhishingDetector:
                 elif feature == "domain_age_months":
                     if value > 0:
                         score += value * weight
+                elif feature == "has_valid_cert":
+                    # Special handling for SSL certificate
+                    score += ssl_weights.get(value, 0.0)
                 else:
                     score += value * weight
 
@@ -368,8 +378,9 @@ class PhishingDetector:
         if features.get("has_https", 0) == 0:
             warnings.append("⚠️ URL does not use HTTPS")
 
-        if features.get("has_valid_cert", 0) == 0 and features.get("has_https", 0) > 0:
-            warnings.append("⚠️ Invalid or missing SSL certificate")
+        # Only warn about cert if it's definitely invalid (0.0), not uncertain (0.5)
+        if features.get("has_valid_cert", 0) == 0.0 and features.get("has_https", 0) > 0:
+            warnings.append("⚠️ SSL certificate validation failed")
 
         if (
             features.get("domain_age_months", -1) >= 0

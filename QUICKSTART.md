@@ -8,8 +8,8 @@ Get up and running with the Auto Phishing Detection Tool in 5 minutes!
 
 ```bash
 # Clone the repository
-git clone https://github.com/subrat243/Phisherman.git
-cd Phisherman
+git clone https://github.com/yourusername/Auto-phishing-detect-tool.git
+cd Auto-phishing-detect-tool
 
 # Run automated setup
 chmod +x setup.sh
@@ -23,10 +23,31 @@ The setup script will:
 - ✅ Create necessary directories
 - ✅ Set up configuration files
 
+**Note**: If installation fails with memory issues, install packages manually:
+
+```bash
+# Install in smaller batches to avoid memory issues
+pip install --break-system-packages numpy pandas scikit-learn joblib
+pip install --break-system-packages fastapi uvicorn requests beautifulsoup4
+pip install --break-system-packages tldextract python-whois dnspython
+pip install --break-system-packages nltk colorama tqdm loguru
+pip install --break-system-packages lxml cryptography pyOpenSSL
+
+# Optional ML frameworks (requires more memory)
+pip install --break-system-packages xgboost lightgbm
+```
+
 ### 2. Activate Environment
 
 ```bash
 source venv/bin/activate
+```
+
+Or if using the system Python:
+
+```bash
+# No virtual environment needed if installed with --break-system-packages
+python3 detect.py -u https://example.com
 ```
 
 ### 3. Choose Your Path
@@ -50,15 +71,20 @@ python detect.py -f test_urls.txt
 
 #### 🧠 Option B: Full ML-Powered Detection
 
-Train ML models for enhanced accuracy:
+Train ML models for enhanced accuracy (requires xgboost and lightgbm):
 
 ```bash
+# First, ensure ML libraries are installed
+pip install --break-system-packages xgboost lightgbm
+
 # Collect data and train models (takes 5-10 minutes)
 python train.py --collect-data --models random_forest xgboost ensemble
 
 # Use the trained model
 python detect.py -u https://example.com -m models/best_model.pkl
 ```
+
+**Note**: If you can't install xgboost/lightgbm due to memory constraints, use Option A (rule-based detection) which works without training.
 
 #### 🌐 Option C: API Server
 
@@ -198,11 +224,14 @@ python train.py --data-file data/processed/my_training_data.csv
 ### Issue: Module Not Found
 
 ```bash
-# Make sure virtual environment is activated
+# Make sure virtual environment is activated (if using venv)
 source venv/bin/activate
 
-# Reinstall dependencies
-pip install -r requirements.txt
+# Reinstall dependencies with --break-system-packages
+pip install -r requirements.txt --break-system-packages
+
+# Or install specific missing module
+pip install --break-system-packages <module-name>
 ```
 
 ### Issue: API Won't Start
@@ -221,8 +250,14 @@ uvicorn api.main:app --host 0.0.0.0 --port 8080
 # Check data directory
 ls -la data/processed/
 
+# Ensure ML libraries are installed
+pip install --break-system-packages xgboost lightgbm
+
 # Try with smaller dataset first
 python train.py --collect-data --models random_forest
+
+# If still fails, use rule-based detection (no training needed)
+python detect.py -u https://example.com
 ```
 
 ### Issue: Browser Extension Not Working
@@ -289,18 +324,23 @@ python train.py --collect-data --models random_forest
 ## 💡 Tips
 
 1. **Performance**: Use `--models ensemble` for best accuracy
-2. **Speed**: Use `random_forest` for fastest predictions
+2. **Speed**: Use `random_forest` for fastest predictions  
 3. **Memory**: If training fails, reduce dataset size or use `lightgbm`
-4. **API**: Enable CORS in production for web integrations
-5. **Security**: Use HTTPS in production deployments
+4. **Installation**: Use `--break-system-packages` flag for pip on some systems
+5. **No Training**: Rule-based detection works immediately without ML models
+6. **API**: Enable CORS in production for web integrations
+7. **Security**: Use HTTPS in production deployments
 
 ## ⚠️ Important Notes
 
 - Rule-based detection works immediately but ML models are more accurate
+- Use `pip install --break-system-packages` on systems with externally-managed Python
+- Training requires xgboost and lightgbm libraries (optional)
 - Training requires at least 1000 samples for good results
 - Browser extension needs API running for ML predictions
 - Always verify suspicious detections manually
 - Keep training data updated with new phishing patterns
+- If memory is limited, use rule-based detection without training
 
 ## 🆘 Need Help?
 

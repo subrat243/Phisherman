@@ -62,8 +62,8 @@ virtualenv (recommended)
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/subrat243/Phisherman.git
-cd Phisherman
+git clone https://github.com/yourusername/Auto-phishing-detect-tool.git
+cd Auto-phishing-detect-tool
 ```
 
 2. **Create virtual environment**
@@ -76,7 +76,23 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 3. **Install dependencies**
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt --break-system-packages
+```
+
+**Note**: If you encounter memory issues during installation, install packages in smaller batches:
+
+```bash
+# Install core ML libraries
+pip install --break-system-packages numpy pandas scikit-learn joblib
+
+# Install ML frameworks (may need more memory)
+pip install --break-system-packages xgboost lightgbm
+
+# Install web/API dependencies
+pip install --break-system-packages fastapi uvicorn requests beautifulsoup4
+
+# Install remaining packages
+pip install --break-system-packages -r requirements.txt
 ```
 
 4. **Download NLTK data** (for text analysis)
@@ -86,6 +102,8 @@ python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 ```
 
 ### 🎓 Training Models
+
+**Note**: Training requires ML libraries (xgboost, lightgbm). If you encounter installation issues, you can use rule-based detection without training.
 
 #### Option 1: Collect Data and Train
 
@@ -308,7 +326,7 @@ print(f"{'='*60}\n")
 ## 🗂️ Project Structure
 
 ```
-Phisherman/
+Auto-phishing-detect-tool/
 ├── api/
 │   └── main.py                 # FastAPI REST API
 ├── browser_extension/
@@ -476,9 +494,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-- **Author**: Subrat Samantaray
-- **Email**: subratsamantaray43@gmail.com
-- **GitHub**: [@subrat243](https://github.com/subrat243)
+- **Author**: Your Name
+- **Email**: your.email@example.com
+- **GitHub**: [@yourusername](https://github.com/yourusername)
 
 ## 🗺️ Roadmap
 

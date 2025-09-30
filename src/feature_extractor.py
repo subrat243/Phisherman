@@ -434,44 +434,53 @@ class URLFeatureExtractor:
             hostname = parsed.netloc.split(":")[0]
 
             if parsed.scheme == "https":
-                context = ssl.create_default_context()
-                with socket.create_connection(
-                    (hostname, 443), timeout=self.timeout
-                ) as sock:
-                    with context.wrap_socket(
-                        sock, server_hostname=hostname
-                    ) as secure_sock:
-                        cert = secure_sock.getpeercert()
+                try:
+                    context = ssl.create_default_context()
+                    with socket.create_connection(
+                        (hostname, 443), timeout=self.timeout
+                    ) as sock:
+                        with context.wrap_socket(
+                            sock, server_hostname=hostname
+                        ) as secure_sock:
+                            cert = secure_sock.getpeercert()
 
-                        # 55. Certificate issuer
-                        features["has_valid_cert"] = 1.0
+                            # 55. Certificate issuer
+                            features["has_valid_cert"] = 1.0
 
-                        # 56. Certificate age
-                        not_before = ssl.cert_time_to_seconds(cert["notBefore"])
-                        cert_age = (
-                            datetime.now().timestamp() - not_before
-                        ) / 86400  # days
-                        features["cert_age_days"] = cert_age
+                            # 56. Certificate age
+                            not_before = ssl.cert_time_to_seconds(cert["notBefore"])
+                            cert_age = (
+                                datetime.now().timestamp() - not_before
+                            ) / 86400  # days
+                            features["cert_age_days"] = cert_age
 
-                        # 57. Certificate remaining validity
-                        not_after = ssl.cert_time_to_seconds(cert["notAfter"])
-                        remaining_validity = (
-                            not_after - datetime.now().timestamp()
-                        ) / 86400
-                        features["cert_remaining_days"] = remaining_validity
+                            # 57. Certificate remaining validity
+                            not_after = ssl.cert_time_to_seconds(cert["notAfter"])
+                            remaining_validity = (
+                                not_after - datetime.now().timestamp()
+                            ) / 86400
+                            features["cert_remaining_days"] = remaining_validity
 
-                        # 58. Certificate has SAN
-                        san = cert.get("subjectAltName", [])
-                        features["cert_has_san"] = 1.0 if san else 0.0
-
+                            # 58. Certificate has SAN
+                            san = cert.get("subjectAltName", [])
+                            features["cert_has_san"] = 1.0 if san else 0.0
+                except (ssl.SSLError, socket.timeout, socket.error, OSError) as ssl_err:
+                    # SSL connection failed - mark as having issues but not necessarily invalid
+                    # Some legitimate sites may have temporary SSL issues
+                    features["has_valid_cert"] = 0.5  # Uncertain rather than definitely invalid
+                    features["cert_age_days"] = -1.0
+                    features["cert_remaining_days"] = -1.0
+                    features["cert_has_san"] = 0.0
             else:
+                # HTTP (not HTTPS)
                 features["has_valid_cert"] = 0.0
                 features["cert_age_days"] = -1.0
                 features["cert_remaining_days"] = -1.0
                 features["cert_has_san"] = 0.0
 
         except Exception as e:
-            features["has_valid_cert"] = 0.0
+            # General error - don't penalize too much as it could be network issues
+            features["has_valid_cert"] = 0.5
             features["cert_age_days"] = -1.0
             features["cert_remaining_days"] = -1.0
             features["cert_has_san"] = 0.0
