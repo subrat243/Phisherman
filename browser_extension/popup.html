@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phishing Shield</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 380px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      border-radius: 0;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .header .subtitle {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .status-card {
+      padding: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-badge.safe {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-badge.danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-badge.checking {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #667eea;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .url-display {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      word-break: break-all;
+      color: #6b7280;
+      margin-bottom: 15px;
+    }
+
+    .risk-meter {
+      margin-bottom: 20px;
+    }
+
+    .risk-meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .risk-meter-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .risk-meter-fill {
+      height: 100%;
+      transition: width 0.5s ease-out, background 0.3s;
+      border-radius: 4px;
+    }
+
+    .risk-low { background: #10b981; }
+    .risk-medium { background: #f59e0b; }
+    .risk-high { background: #ef4444; }
+    .risk-critical { background: #dc2626; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .info-item {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .info-item-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 4px;
+    }
+
+    .info-item-label {
+      font-size: 11px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .warnings-section {
+      padding: 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: none;
+    }
+
+    .warnings-section.active {
+      display: block;
+    }
+
+    .warnings-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #dc2626;
+    }
+
+    .warning-item {
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #92400e;
+    }
+
+    .actions {
+      padding: 20px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+
+    .stats-section {
+      padding: 20px;
+      background: #f9fafb;
+    }
+
+    .stats-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #374151;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat-item {
+      background: white;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .footer {
+      padding: 15px 20px;
+      background: #f9fafb;
+      text-align: center;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      font-size: 12px;
+    }
+
+    .footer-links a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #6b7280;
+    }
+
+    .spinner {
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <span>🛡️</span>
+        <span>Phishing Shield</span>
+      </h1>
+      <div class="subtitle">AI-Powered Protection</div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="status-card">
+      <div class="status-indicator">
+        <div id="statusBadge" class="status-badge checking">
+          <span id="statusIcon">🔍</span>
+          <span id="statusText">Checking...</span>
+        </div>
+        <div class="toggle-container">
+          <label class="toggle">
+            <input type="checkbox" id="protectionToggle" checked>
+            <span class="slider"></span>
+          </label>
+          <span style="font-size: 13px; color: #6b7280;">Protection</span>
+        </div>
+      </div>
+
+      <div id="urlDisplay" class="url-display">
+        Analyzing current page...
+      </div>
+
+      <div id="riskMeter" class="risk-meter hidden">
+        <div class="risk-meter-label">
+          <span>Risk Score</span>
+          <span id="riskScore">0/100</span>
+        </div>
+        <div class="risk-meter-bar">
+          <div id="riskMeterFill" class="risk-meter-fill risk-low" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div id="infoGrid" class="info-grid hidden">
+        <div class="info-item">
+          <div class="info-item-value" id="classification">-</div>
+          <div class="info-item-label">Classification</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-value" id="probability">-</div>
+          <div class="info-item-label">Confidence</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warnings Section -->
+    <div id="warningsSection" class="warnings-section">
+      <div class="warnings-title">⚠️ Security Warnings</div>
+      <div id="warningsList"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="checkBtn" class="btn btn-primary">
+        <span>🔍</span>
+        <span>Check This Page</span>
+      </button>
+      <button id="reportBtn" class="btn btn-danger hidden">
+        <span>🚨</span>
+        <span>Report Phishing</span>
+      </button>
+      <button id="settingsBtn" class="btn btn-secondary">
+        <span>⚙️</span>
+        <span>Settings</span>
+      </button>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-section">
+      <div class="stats-title">Protection Statistics</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statChecked">0</div>
+          <div class="stat-label">Checked</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statBlocked">0</div>
+          <div class="stat-label">Blocked</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statSafe">0</div>
+          <div class="stat-label">Safe</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-links">
+        <a href="#" id="helpLink">Help</a>
+        <a href="#" id="aboutLink">About</a>
+        <a href="#" id="privacyLink">Privacy</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

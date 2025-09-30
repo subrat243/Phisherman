@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚠️ Phishing Warning - Site Blocked</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 48px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .warning-icon {
+      text-align: center;
+      font-size: 120px;
+      margin-bottom: 24px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    h1 {
+      font-size: 42px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 32px;
+      opacity: 0.95;
+    }
+
+    .danger-box {
+      background: rgba(255, 255, 255, 0.15);
+      border-left: 4px solid white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+
+    .danger-box h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .danger-box p {
+      font-size: 16px;
+      line-height: 1.6;
+      opacity: 0.95;
+    }
+
+    .url-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+      word-break: break-all;
+    }
+
+    .url-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    .url-text {
+      font-size: 16px;
+      font-family: 'Courier New', monospace;
+      color: #FEE2E2;
+    }
+
+    .risk-score {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .score-label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+
+    .score-value {
+      font-size: 64px;
+      font-weight: 900;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .score-meter {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: white;
+      border-radius: 6px;
+      transition: width 1s ease-out;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .warnings-section {
+      margin-bottom: 32px;
+    }
+
+    .warnings-section h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .warning-list {
+      list-style: none;
+    }
+
+    .warning-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: start;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .warning-item-icon {
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      padding: 16px 32px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #DC2626;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: #F3F4F6;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-danger {
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .info-section {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 24px;
+    }
+
+    .info-section h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-section p {
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .footer p {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 32px 24px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .warning-icon {
+        font-size: 80px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .score-value {
+        font-size: 48px;
+      }
+    }
+
+    .protected-by {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .shield-icon {
+      display: inline-block;
+      animation: rotate 10s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Warning Icon -->
+    <div class="warning-icon">🚨</div>
+
+    <!-- Header -->
+    <h1>Phishing Site Blocked</h1>
+    <div class="subtitle">This website has been identified as a potential phishing attack</div>
+
+    <!-- Danger Box -->
+    <div class="danger-box">
+      <h2>
+        <span>⛔</span>
+        <span>Why was this site blocked?</span>
+      </h2>
+      <p>
+        Our AI-powered phishing detection system has identified this website as highly suspicious.
+        It may be attempting to steal your personal information, passwords, or financial data.
+      </p>
+    </div>
+
+    <!-- URL Box -->
+    <div class="url-box">
+      <div class="url-label">Blocked URL</div>
+      <div class="url-text" id="blocked-url">Loading...</div>
+    </div>
+
+    <!-- Risk Score -->
+    <div class="risk-score">
+      <div class="score-label">Risk Score</div>
+      <div class="score-value" id="risk-score">--</div>
+      <div class="score-meter">
+        <div class="score-fill" id="score-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Warnings -->
+    <div class="warnings-section">
+      <h3>
+        <span>⚠️</span>
+        <span>Security Threats Detected</span>
+      </h3>
+      <ul class="warning-list" id="warning-list">
+        <li class="warning-item">
+          <span class="warning-item-icon">🔍</span>
+          <span>Suspicious URL patterns detected</span>
+        </li>
+        <li class="warning-item">
+          <span class="warning-item-icon">🌐</span>
+          <span>Domain reputation check failed</span>
+        </li>
+        <li class="warning-item">
+          <span class="warning-item-icon">🔒</span>
+          <span>Potential credential theft attempt</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-primary" id="go-back">
+        <span>←</span>
+        <span>Go Back to Safety</span>
+      </button>
+      <button class="btn btn-secondary" id="report-btn">
+        <span>🚨</span>
+        <span>Report This Site</span>
+      </button>
+    </div>
+
+    <!-- Advanced Options -->
+    <details style="margin-top: 16px;">
+      <summary style="cursor: pointer; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; font-weight: 600;">
+        Advanced Options (Not Recommended)
+      </summary>
+      <div style="margin-top: 16px;">
+        <button class="btn btn-danger" id="proceed-anyway" style="width: 100%; margin-bottom: 12px;">
+          <span>⚠️</span>
+          <span>Proceed Anyway (Dangerous)</span>
+        </button>
+        <p style="font-size: 12px; opacity: 0.8; text-align: center;">
+          Only proceed if you are absolutely certain this site is safe
+        </p>
+      </div>
+    </details>
+
+    <!-- Info Section -->
+    <div class="info-section">
+      <h4>
+        <span>💡</span>
+        <span>What should I do?</span>
+      </h4>
+      <p>• <strong>Do not</strong> enter any personal information on this site</p>
+      <p>• <strong>Do not</strong> download any files from this site</p>
+      <p>• Close this tab and verify the URL with official sources</p>
+      <p>• If you received a link via email, report it as phishing</p>
+      <p>• Contact your IT security team if this is work-related</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="protected-by">
+        <span>Protected by</span>
+        <span class="shield-icon">🛡️</span>
+        <span><strong>Phishing Shield</strong></span>
+      </div>
+      <p style="margin-top: 8px;">
+        AI-Powered Phishing Detection & Prevention
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const blockedUrl = urlParams.get('url') || 'Unknown URL';
+    const riskScore = parseInt(urlParams.get('score') || '100');
+
+    // Display blocked URL
+    document.getElementById('blocked-url').textContent = blockedUrl;
+
+    // Display risk score
+    document.getElementById('risk-score').textContent = riskScore + '/100';
+
+    // Animate score meter
+    setTimeout(() => {
+      document.getElementById('score-fill').style.width = riskScore + '%';
+    }, 300);
+
+    // Go back button
+    document.getElementById('go-back').addEventListener('click', () => {
+      window.history.back();
+    });
+
+    // Report button
+    document.getElementById('report-btn').addEventListener('click', () => {
+      const reportUrl = `https://safebrowsing.google.com/safebrowsing/report_phish/?url=${encodeURIComponent(blockedUrl)}`;
+      window.open(reportUrl, '_blank');
+    });
+
+    // Proceed anyway (with warning)
+    document.getElementById('proceed-anyway').addEventListener('click', () => {
+      const confirmed = confirm(
+        '⚠️ FINAL WARNING ⚠️\n\n' +
+        'You are about to visit a site that has been identified as a phishing attack.\n\n' +
+        'This site may:\n' +
+        '• Steal your passwords and personal information\n' +
+        '• Install malware on your device\n' +
+        '• Access your financial accounts\n\n' +
+        'Are you ABSOLUTELY SURE you want to continue?'
+      );
+
+      if (confirmed) {
+        const doubleConfirm = confirm(
+          'LAST CHANCE TO TURN BACK\n\n' +
+          'By clicking OK, you acknowledge:\n' +
+          '• You understand the extreme risks\n' +
+          '• You are proceeding at your own risk\n' +
+          '• This extension is not responsible for any damage\n\n' +
+          'Click OK to proceed or Cancel to go back.'
+        );
+
+        if (doubleConfirm) {
+          window.location.href = blockedUrl;
+        }
+      }
+    });
+
+    // Add dynamic warnings based on URL analysis
+    function addDynamicWarnings() {
+      const warningList = document.getElementById('warning-list');
+      warningList.innerHTML = '';
+
+      const warnings = [
+        { icon: '🌐', text: 'High-risk domain detected' },
+        { icon: '🔒', text: 'Suspicious SSL/TLS configuration' },
+        { icon: '🎣', text: 'Known phishing patterns identified' },
+        { icon: '⚡', text: 'Rapid domain registration detected' },
+        { icon: '🚫', text: 'Domain on security blocklists' }
+      ];
+
+      // Show warnings based on risk score
+      const numWarnings = Math.min(Math.ceil(riskScore / 20), warnings.length);
+
+      for (let i = 0; i < numWarnings; i++) {
+        const li = document.createElement('li');
+        li.className = 'warning-item';
+        li.innerHTML = `
+          <span class="warning-item-icon">${warnings[i].icon}</span>
+          <span>${warnings[i].text}</span>
+        `;
+        warningList.appendChild(li);
+      }
+    }
+
+    addDynamicWarnings();
+  </script>
+</body>
+</html>
