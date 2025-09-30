@@ -1,24 +1,21 @@
-# Core ML/AI Libraries
+# Minimal Core Requirements for Phishing Detection Tool
+
+# Core ML Libraries (essential)
 numpy>=1.24.0,<2.0.0
 pandas>=2.0.0
 scikit-learn>=1.3.0
 xgboost>=1.7.0
 lightgbm>=4.0.0
 
-# Natural Language Processing
+# NLP (minimal)
 nltk>=3.8.0
-textblob>=0.17.0
 
-# Web Scraping and Analysis
+# Web Scraping
 beautifulsoup4>=4.12.0
 requests>=2.31.0
 urllib3>=2.0.0
 python-whois>=0.8.0
 dnspython>=2.4.0
-
-# Computer Vision for Logo Detection (optional)
-Pillow>=10.0.0
-imagehash>=4.3.0
 
 # Feature Extraction
 tldextract>=3.4.0
@@ -26,7 +23,7 @@ validators>=0.20.0
 
 # API Framework
 fastapi>=0.100.0
-uvicorn[standard]>=0.23.0
+uvicorn>=0.23.0
 pydantic>=2.0.0
 
 # Email Analysis
@@ -34,6 +31,8 @@ email-validator>=2.0.0
 
 # Security
 cryptography>=41.0.0
+pyOpenSSL>=23.2.0
+certifi>=2023.5.7
 
 # Utilities
 python-dotenv>=1.0.0
@@ -42,24 +41,11 @@ joblib>=1.3.0
 tqdm>=4.65.0
 colorama>=0.4.6
 
-# Logging and Monitoring
+# Logging
 loguru>=0.7.0
-
-# Testing
-pytest>=7.4.0
-pytest-cov>=4.1.0
-
-# Data Visualization (for analysis notebooks)
-matplotlib>=3.7.0
-seaborn>=0.12.0
 
 # HTML/URL parsing
 lxml>=4.9.0
 
 # Async support
 aiohttp>=3.8.5
-httpx>=0.24.1
-
-# SSL/TLS analysis
-pyOpenSSL>=23.2.0
-certifi>=2023.5.7
