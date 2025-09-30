@@ -6,6 +6,26 @@ An advanced AI/ML-powered phishing detection and prevention system that uses mac
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)
 
+---
+
+## 🚨 **IMPORTANT: Avoid Dependency Conflicts**
+
+If you have security tools installed (mitmproxy, theharvester, faradaysec, etc.), you **MUST** use a virtual environment:
+
+```bash
+# Quick setup (one command)
+./setup_venv.sh
+
+# Then always activate before use
+source venv/bin/activate
+```
+
+**Why?** System security tools have strict version requirements that conflict with Phisherman. Virtual environments solve this completely.
+
+📖 **Full guide:** [QUICKFIX.md](QUICKFIX.md) | [DEPENDENCY_RESOLUTION.md](DEPENDENCY_RESOLUTION.md)
+
+---
+
 ## 🌟 Features
 
 ### 🔍 Detection Capabilities
@@ -49,7 +69,19 @@ An advanced AI/ML-powered phishing detection and prevention system that uses mac
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Step 1: Set Up Virtual Environment (Required)
+
+```bash
+# Automated setup
+./setup_venv.sh
+
+# Activate environment
+source venv/bin/activate
+```
+
+Your prompt should now show `(venv)` indicating the virtual environment is active.
+
+### Step 2: Prerequisites
 
 ```bash
 Python 3.8+
