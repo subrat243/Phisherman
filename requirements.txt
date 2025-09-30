@@ -90,6 +90,3 @@ onnxruntime>=1.15.0
 # Feature hashing
 mmh3>=3.1.0
 
-# SSL/TLS analysis
-pyOpenSSL>=23.2.0
-certifi>=2023.5.7
