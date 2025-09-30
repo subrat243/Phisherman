@@ -25,7 +25,7 @@ This is a **comprehensive, production-ready AI/ML-powered phishing detection and
 ## 📁 Project Structure
 
 ```
-Auto-phishing-detect-tool/
+Phisherman/
 ├── api/
 │   └── main.py                    # FastAPI REST API (539 lines)
 ├── browser_extension/

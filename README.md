@@ -62,8 +62,8 @@ virtualenv (recommended)
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/Auto-phishing-detect-tool.git
-cd Auto-phishing-detect-tool
+git clone https://github.com/subrat243/Phisherman.git
+cd Phisherman
 ```
 
 2. **Create virtual environment**
@@ -308,7 +308,7 @@ print(f"{'='*60}\n")
 ## 🗂️ Project Structure
 
 ```
-Auto-phishing-detect-tool/
+Phisherman/
 ├── api/
 │   └── main.py                 # FastAPI REST API
 ├── browser_extension/
@@ -476,9 +476,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-- **Author**: Your Name
-- **Email**: your.email@example.com
-- **GitHub**: [@yourusername](https://github.com/yourusername)
+- **Author**: Subrat Samantaray
+- **Email**: subratsamantaray43@gmail.com
+- **GitHub**: [@subrat243](https://github.com/subrat243)
 
 ## 🗺️ Roadmap
 

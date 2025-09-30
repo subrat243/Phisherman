@@ -8,8 +8,8 @@ Get up and running with the Auto Phishing Detection Tool in 5 minutes!
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Auto-phishing-detect-tool.git
-cd Auto-phishing-detect-tool
+git clone https://github.com/subrat243/Phisherman.git
+cd Phisherman
 
 # Run automated setup
 chmod +x setup.sh
