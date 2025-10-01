@@ -75,6 +75,9 @@ source venv/bin/activate
 # Automated setup
 ./setup_venv.sh
 
+# Or manual setup
+python3 -m venv venv
+
 # Activate environment
 source venv/bin/activate
 ```
