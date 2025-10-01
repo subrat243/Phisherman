@@ -8,8 +8,8 @@ Get up and running with the Auto Phishing Detection Tool in 5 minutes!
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Auto-phishing-detect-tool.git
-cd Auto-phishing-detect-tool
+git clone https://github.com/yourusername/Phisherman.git
+cd Phisherman
 
 # Run automated setup
 chmod +x setup.sh
@@ -301,7 +301,7 @@ python detect.py -u https://example.com
    ```bash
    # Start API
    python api/main.py
-   
+
    # Test integration
    curl http://localhost:8000/docs
    ```
@@ -324,7 +324,7 @@ python detect.py -u https://example.com
 ## 💡 Tips
 
 1. **Performance**: Use `--models ensemble` for best accuracy
-2. **Speed**: Use `random_forest` for fastest predictions  
+2. **Speed**: Use `random_forest` for fastest predictions
 3. **Memory**: If training fails, reduce dataset size or use `lightgbm`
 4. **Installation**: Use `--break-system-packages` flag for pip on some systems
 5. **No Training**: Rule-based detection works immediately without ML models

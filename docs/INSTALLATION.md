@@ -22,8 +22,8 @@ python3 --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Auto-phishing-detect-tool.git
-cd Auto-phishing-detect-tool
+git clone https://github.com/yourusername/Phisherman.git
+cd Phisherman
 
 # Run automated setup
 chmod +x setup.sh
