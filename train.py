@@ -1,401 +1,387 @@
 """
-Complete Training Pipeline for Phishing Detection Models
-Handles data collection, feature extraction, model training, and evaluation
+Enhanced Training Script with Advanced Features
+- Automated data collection from free sources
+- Dataset import support
+- Reinforcement learning
+- Online training
 """
 
 import sys
-from pathlib import Path
-import pandas as pd
 import argparse
-import logging
-from datetime import datetime
+from pathlib import Path
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from data_collector import PhishingDataCollector
+from dataset_loader import DatasetLoader
 from model_trainer import PhishingModelTrainer
+from reinforcement_trainer import ReinforcementTrainer
+import pandas as pd
+import logging
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
 
 def parse_arguments():
     """Parse command line arguments"""
-    parser = argparse.ArgumentParser(description="Train phishing detection models")
-
-    parser.add_argument(
-        "--collect-data",
-        action="store_true",
-        help="Collect and prepare new training data",
+    parser = argparse.ArgumentParser(
+        description='Phisherman - Advanced ML Training',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Collect data from free sources
+  python train.py --collect-data --source all --max-samples 1000
+  
+  # Import existing dataset
+  python train.py --dataset phishing_data.csv --dataset-format csv
+  
+  # Train with reinforcement learning
+  python train.py --enable-rl --feedback-file data/feedback/feedback_log.json
+  
+  # Full training pipeline
+  python train.py --collect-data --source all --models ensemble --enable-rl
+        """
     )
-
-    parser.add_argument(
-        "--data-file",
+    
+    # Data Collection
+    data_group = parser.add_argument_group('Data Collection')
+    data_group.add_argument(
+        '--collect-data',
+        action='store_true',
+        help='Collect data from free sources'
+    )
+    data_group.add_argument(
+        '--source',
+        choices=['phishtank', 'openphish', 'legitimate', 'all'],
+        default='all',
+        help='Data source to collect from'
+    )
+    data_group.add_argument(
+        '--max-samples',
+        type=int,
+        default=1000,
+        help='Maximum samples per source'
+    )
+    
+    # Dataset Import
+    dataset_group = parser.add_argument_group('Dataset Import')
+    dataset_group.add_argument(
+        '--dataset',
         type=str,
-        default="data/processed/training_data_balanced.csv",
-        help="Path to training data CSV file",
+        help='Path to dataset file'
     )
-
-    parser.add_argument(
-        "--models",
-        nargs="+",
-        default=["random_forest", "xgboost", "lightgbm", "ensemble"],
-        choices=[
-            "random_forest",
-            "xgboost",
-            "lightgbm",
-            "logistic_regression",
-            "svm",
-            "neural_network",
-            "ensemble",
-        ],
-        help="Models to train",
+    dataset_group.add_argument(
+        '--dataset-format',
+        choices=['auto', 'csv', 'json', 'uci'],
+        default='auto',
+        help='Dataset format'
     )
-
-    parser.add_argument(
-        "--tune",
-        action="store_true",
-        help="Perform hyperparameter tuning",
-    )
-
-    parser.add_argument(
-        "--tune-model",
+    dataset_group.add_argument(
+        '--url-column',
         type=str,
-        choices=["random_forest", "xgboost", "lightgbm"],
-        default="random_forest",
-        help="Model to tune",
+        default='url',
+        help='Name of URL column in dataset'
     )
-
-    parser.add_argument(
-        "--test-size",
-        type=float,
-        default=0.2,
-        help="Test set size (0-1)",
-    )
-
-    parser.add_argument(
-        "--val-size",
-        type=float,
-        default=0.1,
-        help="Validation set size (0-1)",
-    )
-
-    parser.add_argument(
-        "--output-dir",
+    dataset_group.add_argument(
+        '--label-column',
         type=str,
-        default="models",
-        help="Output directory for trained models",
+        default='label',
+        help='Name of label column in dataset'
     )
-
-    parser.add_argument(
-        "--cross-validate",
-        action="store_true",
-        help="Perform cross-validation",
+    
+    # Model Training
+    training_group = parser.add_argument_group('Model Training')
+    training_group.add_argument(
+        '--models',
+        nargs='+',
+        choices=['random_forest', 'xgboost', 'lightgbm', 'ensemble', 'all'],
+        default=['ensemble'],
+        help='Models to train'
     )
-
-    parser.add_argument(
-        "--cv-folds",
+    training_group.add_argument(
+        '--tune',
+        action='store_true',
+        help='Perform hyperparameter tuning'
+    )
+    training_group.add_argument(
+        '--cross-validate',
+        action='store_true',
+        help='Perform cross-validation'
+    )
+    training_group.add_argument(
+        '--cv-folds',
         type=int,
         default=5,
-        help="Number of cross-validation folds",
+        help='Number of cross-validation folds'
     )
-
+    
+    # Reinforcement Learning
+    rl_group = parser.add_argument_group('Reinforcement Learning')
+    rl_group.add_argument(
+        '--enable-rl',
+        action='store_true',
+        help='Enable reinforcement learning'
+    )
+    rl_group.add_argument(
+        '--feedback-file',
+        type=str,
+        default='data/feedback/feedback_log.json',
+        help='Path to feedback file'
+    )
+    rl_group.add_argument(
+        '--online-learning',
+        action='store_true',
+        help='Enable online learning mode'
+    )
+    rl_group.add_argument(
+        '--update-interval',
+        type=int,
+        default=100,
+        help='Number of samples before model update'
+    )
+    
+    # General Options
+    parser.add_argument(
+        '--output-dir',
+        type=str,
+        default='models',
+        help='Output directory for models'
+    )
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='Verbose output'
+    )
+    
     return parser.parse_args()
 
 
-def collect_and_prepare_data():
-    """Collect and prepare training data"""
-    print("\n" + "=" * 70)
-    print("DATA COLLECTION AND PREPARATION")
-    print("=" * 70)
-
+def collect_data_from_sources(args):
+    """Collect data from free sources"""
+    logger.info("="*70)
+    logger.info("Collecting Data from Free Sources")
+    logger.info("="*70)
+    
     collector = PhishingDataCollector()
+    datasets = []
+    
+    if args.source in ['phishtank', 'all']:
+        logger.info("Collecting from PhishTank...")
+        df = collector.download_phishtank_data(limit=args.max_samples)
+        if not df.empty:
+            datasets.append(df)
+    
+    if args.source in ['openphish', 'all']:
+        logger.info("Collecting from OpenPhish...")
+        df = collector.download_openphish_data(limit=args.max_samples)
+        if not df.empty:
+            datasets.append(df)
+    
+    if args.source in ['legitimate', 'all']:
+        logger.info("Collecting legitimate URLs...")
+        df = collector.get_legitimate_urls(limit=args.max_samples)
+        if not df.empty:
+            datasets.append(df)
+    
+    if datasets:
+        combined_df = pd.concat(datasets, ignore_index=True)
+        combined_df = combined_df.drop_duplicates(subset=['url'])
+        logger.info(f"Collected {len(combined_df)} total URLs")
+        logger.info(f"  Phishing: {sum(combined_df['label'] == 1)}")
+        logger.info(f"  Legitimate: {sum(combined_df['label'] == 0)}")
+        return combined_df
+    
+    return None
 
-    # Collect raw URLs
-    print("\n[1/4] Collecting URLs from sources...")
-    raw_df = collector.combine_datasets()
 
-    if raw_df.empty:
-        logger.error("Failed to collect data")
+def import_dataset(args):
+    """Import dataset from file"""
+    logger.info("="*70)
+    logger.info("Importing Dataset")
+    logger.info("="*70)
+    
+    loader = DatasetLoader()
+    
+    try:
+        df = loader.load_dataset(
+            path=args.dataset,
+            format=args.dataset_format,
+            url_column=args.url_column,
+            label_column=args.label_column
+        )
+        
+        logger.info(f"Imported {len(df)} samples")
+        logger.info(f"  Phishing: {sum(df['is_phishing'] == 1)}")
+        logger.info(f"  Legitimate: {sum(df['is_phishing'] == 0)}")
+        
+        # Rename column to match expected format
+        df = df.rename(columns={'is_phishing': 'label'})
+        
+        return df
+        
+    except Exception as e:
+        logger.error(f"Error importing dataset: {e}")
         return None
 
-    # Extract features
-    print("\n[2/4] Extracting features from URLs...")
-    processed_df = collector.prepare_training_data(raw_df, max_workers=10)
 
-    if processed_df.empty:
-        logger.error("Failed to extract features")
-        return None
-
-    # Balance dataset
-    print("\n[3/4] Balancing dataset...")
-    balanced_df = collector.balance_dataset(processed_df, method="undersample")
-
-    # Save balanced dataset
-    balanced_file = collector.processed_dir / "training_data_balanced.csv"
-    balanced_df.to_csv(balanced_file, index=False)
-    print(f"✓ Saved balanced dataset to {balanced_file}")
-
-    # Get and save statistics
-    print("\n[4/4] Computing dataset statistics...")
-    stats = collector.get_data_statistics(balanced_df)
-
-    stats_file = collector.processed_dir / "dataset_stats.json"
-    import json
-
-    with open(stats_file, "w") as f:
-        json.dump(stats, f, indent=2)
-
-    print(f"\nDataset Summary:")
-    print(f"  Total Samples: {stats['total_samples']}")
-    print(f"  Features: {stats['num_features']}")
-    print(f"  Phishing: {stats['phishing_samples']}")
-    print(f"  Legitimate: {stats['legitimate_samples']}")
-    print(
-        f"  Balance Ratio: {stats['phishing_samples'] / stats['legitimate_samples']:.2f}"
-    )
-
-    return balanced_df
-
-
-def train_models(args):
-    """Train phishing detection models"""
-    print("\n" + "=" * 70)
-    print("MODEL TRAINING")
-    print("=" * 70)
-
-    # Load or prepare data
-    if args.collect_data:
-        df = collect_and_prepare_data()
-        if df is None:
-            logger.error("Data preparation failed")
-            return
-    else:
-        data_file = Path(args.data_file)
-        if not data_file.exists():
-            logger.error(f"Data file not found: {data_file}")
-            logger.info("Run with --collect-data to prepare training data")
-            return
-
-        print(f"\nLoading training data from {data_file}...")
-        df = pd.read_csv(data_file)
-        print(f"✓ Loaded {len(df)} samples with {df.shape[1]} features")
-
-    # Initialize trainer
-    trainer = PhishingModelTrainer(models_dir=args.output_dir)
-
+def train_models(df, args):
+    """Train ML models"""
+    logger.info("="*70)
+    logger.info("Training ML Models")
+    logger.info("="*70)
+    
     # Prepare data
-    print("\n" + "=" * 70)
-    print("PREPARING DATA FOR TRAINING")
-    print("=" * 70)
-
+    collector = PhishingDataCollector()
+    processed_df = collector.prepare_training_data(df, max_workers=5)
+    
+    if processed_df.empty:
+        logger.error("No data available for training")
+        return None
+    
+    # Balance dataset
+    balanced_df = collector.balance_dataset(processed_df, method='undersample')
+    
+    # Initialize trainer
+    trainer = PhishingModelTrainer()
+    
+    # Prepare train/val/test splits
     X_train, X_val, X_test, y_train, y_val, y_test = trainer.prepare_data(
-        df,
-        target_col="is_phishing",
-        test_size=args.test_size,
-        val_size=args.val_size,
-        random_state=42,
+        balanced_df,
+        test_size=0.2,
+        val_size=0.1
     )
-
-    # Hyperparameter tuning (optional)
-    if args.tune:
-        print("\n" + "=" * 70)
-        print("HYPERPARAMETER TUNING")
-        print("=" * 70)
-
-        print(f"\nTuning {args.tune_model}...")
-        best_model, best_params = trainer.hyperparameter_tuning(
-            X_train,
-            y_train,
-            model_type=args.tune_model,
-            cv=args.cv_folds,
-        )
-
-        print(f"\n✓ Best parameters found:")
-        for param, value in best_params.items():
-            print(f"    {param}: {value}")
-
+    
+    logger.info(f"Training set: {len(X_train)} samples")
+    logger.info(f"Validation set: {len(X_val)} samples")
+    logger.info(f"Test set: {len(X_test)} samples")
+    
+    # Determine models to train
+    models_to_train = args.models
+    if 'all' in models_to_train:
+        models_to_train = ['random_forest', 'xgboost', 'lightgbm', 'ensemble']
+    
     # Train models
-    print("\n" + "=" * 70)
-    print("TRAINING MODELS")
-    print("=" * 70)
-
+    logger.info(f"Training models: {', '.join(models_to_train)}")
     trainer.train_all_models(
-        X_train,
-        y_train,
-        X_val,
-        y_val,
-        models_to_train=args.models,
+        X_train, y_train,
+        X_val, y_val,
+        models_to_train=models_to_train
     )
-
-    # Evaluate models
-    print("\n" + "=" * 70)
-    print("EVALUATING MODELS")
-    print("=" * 70)
-
-    metrics = trainer.evaluate_all_models(X_test, y_test)
-
-    # Print summary table
-    print("\n" + "=" * 70)
-    print("PERFORMANCE SUMMARY")
-    print("=" * 70)
-
-    print(
-        f"\n{'Model':<20} {'Accuracy':<10} {'Precision':<10} {'Recall':<10} {'F1':<10} {'ROC AUC':<10}"
-    )
-    print("-" * 70)
-
-    for model_name, model_metrics in metrics.items():
-        print(
-            f"{model_name:<20} "
-            f"{model_metrics['accuracy']:<10.4f} "
-            f"{model_metrics['precision']:<10.4f} "
-            f"{model_metrics['recall']:<10.4f} "
-            f"{model_metrics['f1_score']:<10.4f} "
-            f"{model_metrics.get('roc_auc', 0):<10.4f}"
-        )
-
-    # Get feature importance
-    print("\n" + "=" * 70)
-    print("FEATURE IMPORTANCE")
-    print("=" * 70)
-
-    trainer.get_feature_importance(top_n=20)
-
-    # Cross-validation (optional)
-    if args.cross_validate:
-        print("\n" + "=" * 70)
-        print("CROSS-VALIDATION")
-        print("=" * 70)
-
-        # Combine train and val for CV
-        X_combined = pd.concat(
-            [
-                pd.DataFrame(X_train, columns=trainer.feature_names),
-                pd.DataFrame(X_val, columns=trainer.feature_names),
-            ]
-        )
-        y_combined = pd.concat([pd.Series(y_train), pd.Series(y_val)])
-
-        best_model_name = max(metrics.keys(), key=lambda k: metrics[k]["f1_score"])
-
-        cv_results = trainer.cross_validate(
-            X_combined.values,
-            y_combined.values,
-            model_name=best_model_name,
-            cv=args.cv_folds,
-        )
-
-    # Save best model
-    print("\n" + "=" * 70)
-    print("SAVING MODELS")
-    print("=" * 70)
-
+    
+    # Evaluate
+    logger.info("\nEvaluating models...")
+    results = trainer.evaluate_all_models(X_test, y_test)
+    
     # Find best model
-    best_model_name = max(metrics.keys(), key=lambda k: metrics[k]["f1_score"])
-    print(f"\nBest Model: {best_model_name}")
-    print(f"F1 Score: {metrics[best_model_name]['f1_score']:.4f}")
-
+    best_model = max(results.items(), key=lambda x: x[1]['accuracy'])
+    logger.info(f"\n🏆 Best Model: {best_model[0]}")
+    logger.info(f"   Accuracy: {best_model[1]['accuracy']:.2%}")
+    
     # Save best model
-    trainer.save_model(model_name=best_model_name, filename="best_model.pkl")
+    trainer.save_model(best_model[0], filename='best_model.pkl')
+    
+    return trainer, best_model[0]
 
-    # Also save all individual models
-    print("\nSaving all trained models...")
-    for model_name in trainer.models.keys():
-        trainer.save_model(model_name=model_name)
 
-    # Generate training report
-    print("\n" + "=" * 70)
-    print("GENERATING TRAINING REPORT")
-    print("=" * 70)
-
-    report = {
-        "timestamp": datetime.now().isoformat(),
-        "dataset": {
-            "total_samples": len(df),
-            "train_samples": len(X_train),
-            "val_samples": len(X_val),
-            "test_samples": len(X_test),
-            "num_features": X_train.shape[1],
-        },
-        "models_trained": list(trainer.models.keys()),
-        "best_model": best_model_name,
-        "metrics": {
-            model_name: {
-                k: float(v) if not isinstance(v, list) else v
-                for k, v in model_metrics.items()
-            }
-            for model_name, model_metrics in metrics.items()
-        },
-        "hyperparameter_tuning": args.tune,
-        "cross_validation": args.cross_validate,
-    }
-
-    # Save report
-    report_file = Path(args.output_dir) / "training_report.json"
-    import json
-
-    with open(report_file, "w") as f:
-        json.dump(report, f, indent=2)
-
-    print(f"\n✓ Training report saved to {report_file}")
-
-    print("\n" + "=" * 70)
-    print("TRAINING COMPLETE!")
-    print("=" * 70)
-
-    print(f"\nModel files saved in: {args.output_dir}/")
-    print(f"Best model: {args.output_dir}/best_model.pkl")
-    print(f"Scaler: {args.output_dir}/best_model_scaler.pkl")
-    print(f"Features: {args.output_dir}/best_model_features.json")
-    print(f"\nTo use the model:")
-    print(
-        f"  1. Load in Python: detector.load_model('{args.output_dir}/best_model.pkl')"
-    )
-    print(f"  2. Start API: python api/main.py")
-    print(
-        f'  3. Test: curl -X POST http://localhost:8000/api/v1/analyze/url -d \'{{"url":"https://example.com"}}\''
-    )
+def setup_reinforcement_learning(args, model_path, scaler_path):
+    """Setup reinforcement learning"""
+    logger.info("="*70)
+    logger.info("Setting up Reinforcement Learning")
+    logger.info("="*70)
+    
+    try:
+        rl_trainer = ReinforcementTrainer(
+            model_path=model_path,
+            scaler_path=scaler_path,
+            feedback_dir='data/feedback',
+            checkpoint_dir='models/checkpoints'
+        )
+        
+        stats = rl_trainer.get_statistics()
+        logger.info(f"Total feedback entries: {stats['total_feedback']}")
+        logger.info(f"Labeled feedback: {stats['labeled_feedback']}")
+        logger.info(f"Average reward: {stats['average_reward']:.3f}")
+        
+        if args.online_learning and stats['labeled_feedback'] >= args.update_interval:
+            logger.info(f"\nUpdating model with feedback...")
+            success = rl_trainer.update_model(batch_size=args.update_interval)
+            if success:
+                logger.info("✓ Model updated successfully")
+            else:
+                logger.warning("⚠ Model update failed or no improvement")
+        
+        return rl_trainer
+        
+    except Exception as e:
+        logger.error(f"Error setting up RL: {e}")
+        return None
 
 
 def main():
     """Main training pipeline"""
-    print("\n" + "=" * 70)
-    print("PHISHING DETECTION MODEL TRAINING PIPELINE")
-    print("=" * 70)
-    print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
     args = parse_arguments()
-
-    print(f"\nConfiguration:")
-    print(f"  Data collection: {args.collect_data}")
-    print(f"  Data file: {args.data_file}")
-    print(f"  Models to train: {', '.join(args.models)}")
-    print(f"  Hyperparameter tuning: {args.tune}")
-    print(f"  Cross-validation: {args.cross_validate}")
-    print(f"  Test size: {args.test_size}")
-    print(f"  Validation size: {args.val_size}")
-    print(f"  Output directory: {args.output_dir}")
-
-    try:
-        train_models(args)
-
-        print("\n" + "=" * 70)
-        print("SUCCESS!")
-        print("=" * 70)
-        print(f"Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-    except Exception as e:
-        logger.error(f"Training failed: {e}", exc_info=True)
-        print("\n" + "=" * 70)
-        print("TRAINING FAILED")
-        print("=" * 70)
-        print(f"Error: {e}")
-        sys.exit(1)
+    
+    print("="*70)
+    print("🛡️  Phisherman - Advanced ML Training")
+    print("="*70)
+    print()
+    
+    # Step 1: Get training data
+    df = None
+    
+    if args.collect_data:
+        df = collect_data_from_sources(args)
+    elif args.dataset:
+        df = import_dataset(args)
+    else:
+        logger.error("No data source specified. Use --collect-data or --dataset")
+        return
+    
+    if df is None or df.empty:
+        logger.error("No data available for training")
+        return
+    
+    # Step 2: Train models
+    result = train_models(df, args)
+    if result is None:
+        logger.error("Training failed")
+        return
+    
+    trainer, best_model_name = result
+    
+    # Step 3: Reinforcement Learning (if enabled)
+    if args.enable_rl:
+        model_path = f"models/best_model.pkl"
+        scaler_path = f"models/{best_model_name}_scaler.pkl"
+        
+        rl_trainer = setup_reinforcement_learning(args, model_path, scaler_path)
+    
+    # Summary
+    print()
+    print("="*70)
+    print("✅ Training Complete!")
+    print("="*70)
+    print()
+    print("Next Steps:")
+    print("  1. Test the model:")
+    print('     python detect.py -m "models/best_model.pkl" \\')
+    print(f'                      -s "models/{best_model_name}_scaler.pkl" \\')
+    print(f'                      --features "models/{best_model_name}_features.json" \\')
+    print('                      -u "https://example.com"')
+    print()
+    print("  2. Start API server:")
+    print("     python api/main.py")
+    print()
+    if args.enable_rl:
+        print("  3. Reinforcement learning is enabled!")
+        print("     Feedback will be collected automatically")
+        print()
+    print("="*70)
 
 
 if __name__ == "__main__":

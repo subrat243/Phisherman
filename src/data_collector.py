@@ -35,15 +35,17 @@ class PhishingDataCollector:
 
         self.feature_extractor = URLFeatureExtractor()
 
-        # Public phishing datasets URLs
+        # Public        # Free data source APIs
         self.dataset_sources = {
-            "phishtank": "http://data.phishtank.com/data/online-valid.csv",
+            "phishtank": "http://data.phishtank.com/data/online-valid.json",
             "openphish": "https://openphish.com/feed.txt",
+            "tranco": "https://tranco-list.eu/top-1m.csv.zip",
+            "urlhaus": "https://urlhaus.abuse.ch/downloads/csv_recent/"
         }
 
     def download_phishtank_data(self, limit: Optional[int] = None) -> pd.DataFrame:
         """
-        Download phishing URLs from PhishTank
+        Download phishing URLs from PhishTank (Real API)
 
         Args:
             limit: Maximum number of URLs to download
@@ -54,54 +56,62 @@ class PhishingDataCollector:
         logger.info("Downloading PhishTank data...")
 
         try:
-            # Note: PhishTank requires API key for real-time data
-            # This is a placeholder - you need to register at phishtank.com
-
-            # For demo, we'll create sample phishing URLs
-            phishing_urls = [
-                "http://paypal-security-verify.com/login",
-                "http://amazon-customer-service.tk/update",
-                "http://secure-apple-id.ml/verify",
-                "http://192.168.1.1/microsoft-login",
-                "http://facebook-secure-login.ga/account",
-                "http://netflix-billing-update.cf/payment",
-                "http://google-account-recovery.gq/reset",
-                "http://chase-bank-verify.tk/login",
-                "http://wellsfargo-security.ml/confirm",
-                "http://bankofamerica-alert.ga/verify",
-                "http://paypal-resolution-center.cf/dispute",
-                "http://ebay-seller-update.tk/account",
-                "http://instagram-copyright-notice.ml/appeal",
-                "http://linkedin-premium-offer.ga/upgrade",
-                "http://twitter-verification-blue.cf/verify",
-                "http://microsoft-office365-renewal.tk/billing",
-                "http://adobe-account-suspended.ml/restore",
-                "http://dropbox-storage-full.ga/upgrade",
-                "http://spotify-premium-free.cf/claim",
-                "http://coinbase-security-alert.tk/verify",
-            ]
-
-            df = pd.DataFrame(
-                {
-                    "url": phishing_urls,
-                    "label": 1,  # 1 = phishing
-                    "source": "phishtank",
-                }
-            )
-
-            if limit:
-                df = df.head(limit)
-
-            logger.info(f"Downloaded {len(df)} phishing URLs from PhishTank")
-            return df
-
+            # Try real API first
+            url = "http://data.phishtank.com/data/online-valid.json"
+            logger.info(f"Fetching from {url}")
+            
+            response = requests.get(url, timeout=30)
+            if response.status_code == 200:
+                data = response.json()
+                urls = [entry['url'] for entry in data[:limit] if 'url' in entry]
+                
+                df = pd.DataFrame({
+                    "url": urls,
+                    "label": 1,
+                    "source": "phishtank"
+                })
+                
+                logger.info(f"Downloaded {len(df)} phishing URLs from PhishTank API")
+                return df
         except Exception as e:
-            logger.error(f"Error downloading PhishTank data: {e}")
-            return pd.DataFrame()
+            logger.warning(f"PhishTank API failed: {e}, using fallback data")
+        
+        # Fallback to sample data
+        phishing_urls = [
+            "http://paypal-security-verify.com/login",
+            "http://amazon-customer-service.tk/update",
+            "http://secure-apple-id.ml/verify",
+            "http://192.168.1.1/microsoft-login",
+            "http://facebook-secure-login.ga/account",
+            "http://netflix-billing-update.cf/payment",
+            "http://google-account-recovery.gq/reset",
+            "http://chase-bank-verify.tk/login",
+            "http://wellsfargo-security.ml/confirm",
+            "http://bankofamerica-alert.ga/verify",
+            "http://paypal-resolution-center.cf/dispute",
+            "http://ebay-seller-update.tk/account",
+            "http://instagram-copyright-notice.ml/appeal",
+            "http://linkedin-premium-offer.ga/upgrade",
+            "http://twitter-verification-blue.cf/verify",
+            "http://microsoft-office365-renewal.tk/billing",
+            "http://adobe-account-suspended.ml/restore",
+            "http://dropbox-storage-full.ga/upgrade",
+            "http://spotify-premium-free.cf/claim",
+            "http://coinbase-security-alert.tk/verify",
+        ]
+
+        df = pd.DataFrame({
+            "url": phishing_urls[:limit] if limit else phishing_urls,
+            "label": 1,
+            "source": "phishtank_fallback"
+        })
+
+        logger.info(f"Using {len(df)} fallback phishing URLs")
+        return df
 
     def download_openphish_data(self, limit: Optional[int] = None) -> pd.DataFrame:
         """
-        Download phishing URLs from OpenPhish
+        Download phishing URLs from OpenPhish (Real API)
 
         Args:
             limit: Maximum number of URLs to download
@@ -112,42 +122,53 @@ class PhishingDataCollector:
         logger.info("Downloading OpenPhish data...")
 
         try:
-            # Sample phishing URLs (OpenPhish feed requires subscription)
-            phishing_urls = [
-                "http://secure-signin-apple.com/id/verify",
-                "http://account-verification-paypal.net/login",
-                "http://amazon-help-center.org/update-payment",
-                "http://netflix-payment-declined.info/billing",
-                "http://microsoft-account-unusual-signin.com/verify",
-                "http://facebook-security-check.org/confirm",
-                "http://instagram-help-center.net/copyright",
-                "http://linkedin-premium-trial.org/activate",
-                "http://chase-fraud-alert.net/verify-identity",
-                "http://wellsfargo-online-banking.org/login",
-                "http://americanexpress-card-services.com/activate",
-                "http://citibank-account-alert.net/verify",
-                "http://usbank-security-check.org/confirm",
-                "http://discover-card-services.com/activate",
-                "http://capital-one-fraud-alert.net/verify",
-            ]
-
-            df = pd.DataFrame(
-                {
-                    "url": phishing_urls,
-                    "label": 1,  # 1 = phishing
-                    "source": "openphish",
-                }
-            )
-
-            if limit:
-                df = df.head(limit)
-
-            logger.info(f"Downloaded {len(df)} phishing URLs from OpenPhish")
-            return df
-
+            # Try real API
+            url = "https://openphish.com/feed.txt"
+            logger.info(f"Fetching from {url}")
+            
+            response = requests.get(url, timeout=30)
+            if response.status_code == 200:
+                urls = response.text.strip().split('\n')
+                urls = [u.strip() for u in urls if u.strip()][:limit]
+                
+                df = pd.DataFrame({
+                    "url": urls,
+                    "label": 1,
+                    "source": "openphish"
+                })
+                
+                logger.info(f"Downloaded {len(df)} phishing URLs from OpenPhish API")
+                return df
         except Exception as e:
-            logger.error(f"Error downloading OpenPhish data: {e}")
-            return pd.DataFrame()
+            logger.warning(f"OpenPhish API failed: {e}, using fallback data")
+        
+        # Fallback
+        phishing_urls = [
+            "http://secure-signin-apple.com/id/verify",
+            "http://account-verification-paypal.net/login",
+            "http://amazon-help-center.org/update-payment",
+            "http://netflix-payment-declined.info/billing",
+            "http://microsoft-account-unusual-signin.com/verify",
+            "http://facebook-security-check.org/confirm",
+            "http://instagram-help-center.net/copyright",
+            "http://linkedin-premium-trial.org/activate",
+            "http://chase-fraud-alert.net/verify-identity",
+            "http://wellsfargo-online-banking.org/login",
+            "http://americanexpress-card-services.com/activate",
+            "http://citibank-account-alert.net/verify",
+            "http://usbank-security-check.org/confirm",
+            "http://discover-card-services.com/activate",
+            "http://capital-one-fraud-alert.net/verify",
+        ]
+
+        df = pd.DataFrame({
+            "url": phishing_urls[:limit] if limit else phishing_urls,
+            "label": 1,
+            "source": "openphish_fallback"
+        })
+
+        logger.info(f"Using {len(df)} fallback phishing URLs")
+        return df
 
     def get_legitimate_urls(self, limit: int = 100) -> pd.DataFrame:
         """

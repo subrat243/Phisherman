@@ -1,199 +1,108 @@
-# 🛡️ Auto Phishing Detection Tool
+# 🛡️ Phisherman - AI Phishing Detection
 
-An advanced AI/ML-powered phishing detection and prevention system that uses machine learning, deep analysis, and real-time monitoring to protect users from phishing attacks.
-
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)
-
----
-
-## 🚨 **IMPORTANT: Avoid Dependency Conflicts**
-
-If you have security tools installed (mitmproxy, theharvester, faradaysec, etc.), you **MUST** use a virtual environment:
-
-```bash
-# Quick setup (one command)
-./setup_venv.sh
-
-# Then always activate before use
-source venv/bin/activate
-```
-
-**Why?** System security tools have strict version requirements that conflict with Phisherman. Virtual environments solve this completely.
-
-📖 **Full guide:** [QUICKFIX.md](QUICKFIX.md) | [DEPENDENCY_RESOLUTION.md](DEPENDENCY_RESOLUTION.md)
-
----
-
-## 🌟 Features
-
-### 🔍 Detection Capabilities
-
-- **URL Analysis**: Advanced feature extraction from URLs including domain age, SSL certificates, DNS records, and suspicious patterns
-- **Email Analysis**: Comprehensive email header and content analysis for phishing indicators
-- **Machine Learning**: Multiple ML models (Random Forest, XGBoost, LightGBM, Neural Networks, Ensemble)
-- **Real-time Detection**: Fast prediction with sub-second response times
-- **Rule-based Fallback**: Heuristic-based detection when ML models are unavailable
-
-### 🎯 Key Components
-
-1. **Feature Extractor**: Extracts 50+ features from URLs
-2. **Email Analyzer**: Analyzes email headers, body, links, and attachments
-3. **ML Model Trainer**: Trains and evaluates multiple models
-4. **REST API**: FastAPI-based API for integration
-5. **Browser Extension**: Chrome/Edge extension for real-time protection
-6. **CLI Tool**: Command-line interface for batch processing
-
-### 📊 Analyzed Features
-
-#### URL Features (50+)
-- URL structure (length, special characters, entropy)
-- Domain analysis (age, registrar, WHOIS data)
-- SSL/TLS certificate validation
-- DNS records and MX records
-- IP-based URLs detection
-- Shortened URL detection
-- Suspicious keywords and patterns
-- Known brand impersonation
-
-#### Email Features (45+)
-- Header analysis (SPF, DKIM, DMARC)
-- Sender reputation
-- Display name vs. email mismatch
-- Link analysis and phishing URLs
-- Attachment scanning
-- Content analysis (urgency, threats, credentials requests)
-- HTML/JavaScript analysis
-- Hidden elements detection
+Advanced AI/ML-powered phishing detection system with browser extension, REST API, CLI tool, and automated training from free sources.
 
 ## 🚀 Quick Start
 
-### Step 1: Set Up Virtual Environment (Required)
-
 ```bash
-# Automated setup
-./setup_venv.sh
+# 1. Install dependencies
+python -m pip install -r requirements.txt
 
-# Or manual setup
-python3 -m venv venv
+# 2. Run setup
+python setup.py
 
-# Activate environment
-source venv/bin/activate
+# 3. Train with auto-collected data
+python train.py --collect-data --source all --max-samples 1000
+
+# 4. Test detection
+python detect.py -m "models/best_model.pkl" -s "models/random_forest_scaler.pkl" \
+                 --features "models/random_forest_features.json" -u "https://example.com"
+
+# 5. Start API server
+python api/main.py
 ```
 
-Your prompt should now show `(venv)` indicating the virtual environment is active.
+Visit http://localhost:8000/docs for API documentation.
 
-### Step 2: Prerequisites
+## 📦 Installation
 
-```bash
-Python 3.8+
-pip
-virtualenv (recommended)
-```
+### Prerequisites
+- Python 3.8+
+- pip
 
-### Installation
-
-1. **Clone the repository**
+### Setup
 
 ```bash
+# Clone repository
 git clone https://github.com/yourusername/Phisherman.git
 cd Phisherman
+
+# Run automated setup
+python setup.py
 ```
 
-2. **Create virtual environment**
+The setup script will:
+- ✅ Install all dependencies
+- ✅ Download NLTK data
+- ✅ Verify installation
+- ✅ Run basic tests
+
+## 🎯 Features
+
+### Core Capabilities
+- **URL Analysis** - 50+ features (domain age, SSL, DNS, patterns)
+- **Email Analysis** - 45+ features (headers, links, attachments)
+- **ML Detection** - 98% accuracy with ensemble models
+- **Rule-Based Fallback** - Works without training
+- **Real-Time Protection** - Browser extension
+- **REST API** - FastAPI server with auto-docs
+
+### Detection Methods
+1. **Rule-Based** - Heuristic analysis (instant, no training)
+2. **ML-Based** - AI models (98% accuracy, requires training)
+3. **Hybrid** - Combines both for optimal results
+
+## 📖 Usage
+
+### CLI Tool
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Analyze single URL
+python detect.py --url "https://suspicious-site.com"
+
+# Interactive mode
+python detect.py --interactive
+
+# Batch processing
+python detect.py --batch urls.txt
+
+# Show features
+python detect.py --url "https://example.com" --verbose
 ```
 
-3. **Install dependencies**
+### REST API
 
 ```bash
-pip install -r requirements.txt --break-system-packages
-```
-
-**Note**: If you encounter memory issues during installation, install packages in smaller batches:
-
-```bash
-# Install core ML libraries
-pip install --break-system-packages numpy pandas scikit-learn joblib
-
-# Install ML frameworks (may need more memory)
-pip install --break-system-packages xgboost lightgbm
-
-# Install web/API dependencies
-pip install --break-system-packages fastapi uvicorn requests beautifulsoup4
-
-# Install remaining packages
-pip install --break-system-packages -r requirements.txt
-```
-
-4. **Download NLTK data** (for text analysis)
-
-```bash
-python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-```
-
-### 🎓 Training Models
-
-**Note**: Training requires ML libraries (xgboost, lightgbm). If you encounter installation issues, you can use rule-based detection without training.
-
-#### Option 1: Collect Data and Train
-
-```bash
-# Collect data, extract features, and train all models
-python train.py --collect-data --models random_forest xgboost lightgbm ensemble
-
-# With hyperparameter tuning
-python train.py --collect-data --tune --tune-model xgboost
-
-# With cross-validation
-python train.py --collect-data --cross-validate --cv-folds 5
-```
-
-#### Option 2: Use Existing Data
-
-```bash
-# Train using existing processed data
-python train.py --data-file data/processed/training_data_balanced.csv
-
-# Train specific models
-python train.py --models random_forest xgboost
-```
-
-#### Training Options
-
-```bash
---collect-data          Collect and prepare new training data
---data-file PATH        Path to training data CSV
---models MODEL [...]    Models to train
---tune                  Perform hyperparameter tuning
---tune-model MODEL      Model to tune
---test-size FLOAT       Test set size (default: 0.2)
---val-size FLOAT        Validation set size (default: 0.1)
---output-dir DIR        Output directory for models
---cross-validate        Perform cross-validation
---cv-folds INT          Number of CV folds (default: 5)
-```
-
-### 🌐 Starting the API
-
-```bash
-# Start the FastAPI server
+# Start server
 python api/main.py
 
-# Or with custom host/port
-uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+# Or with custom settings
+uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-The API will be available at:
-- **Docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health**: http://localhost:8000/health
+**Endpoints:**
+- `POST /api/v1/analyze/url` - Analyze single URL
+- `POST /api/v1/analyze/batch` - Batch analysis
+- `POST /api/v1/analyze/email` - Email analysis
+- `GET /health` - Health check
+- `GET /docs` - Interactive API docs
 
-## 📚 Usage Examples
+**Example:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/analyze/url" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com"}'
+```
 
 ### Python API
 
@@ -201,229 +110,91 @@ The API will be available at:
 from src.phishing_detector import PhishingDetector
 
 # Initialize detector
-detector = PhishingDetector(
-    model_path='models/best_model.pkl',
-    scaler_path='models/best_model_scaler.pkl',
-    feature_names_path='models/best_model_features.json'
-)
+detector = PhishingDetector()
 
 # Analyze URL
 result = detector.predict_url('https://suspicious-site.com')
+
 print(f"Is Phishing: {result['is_phishing']}")
-print(f"Risk Score: {result['risk_score']:.2f}/100")
+print(f"Risk Score: {result['risk_score']}/100")
 print(f"Classification: {result['classification']}")
-
-# Analyze multiple URLs
-urls = ['https://example1.com', 'https://example2.com']
-results = detector.predict_batch(urls)
-
-# Comprehensive analysis
-report = detector.analyze_url_comprehensive('https://suspicious-site.com')
-print(report)
 ```
 
-### REST API
+### Browser Extension
 
-#### Analyze Single URL
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/analyze/url" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com"}'
-```
-
-Response:
-```json
-{
-  "url": "https://example.com",
-  "is_phishing": false,
-  "phishing_probability": 0.05,
-  "risk_score": 15.3,
-  "classification": "SAFE",
-  "warnings": [],
-  "suspicious_features": [],
-  "timestamp": "2024-01-15T10:30:00"
-}
-```
-
-#### Analyze Batch URLs
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/analyze/batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "urls": [
-      "https://google.com",
-      "http://phishing-site.tk",
-      "https://paypal-verify.com"
-    ]
-  }'
-```
-
-#### Analyze Email
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/analyze/email" \
-  -F "file=@suspicious_email.eml"
-```
-
-#### Comprehensive Analysis
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/analyze/comprehensive" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://suspicious-site.com"}'
-```
-
-### CLI Usage
-
-```python
-# Create a simple CLI script
-from src.phishing_detector import PhishingDetector
-import sys
-
-detector = PhishingDetector(
-    model_path='models/best_model.pkl',
-    scaler_path='models/best_model_scaler.pkl',
-    feature_names_path='models/best_model_features.json'
-)
-
-url = sys.argv[1] if len(sys.argv) > 1 else input("Enter URL: ")
-result = detector.predict_url(url)
-
-print(f"\n{'='*60}")
-print(f"URL: {url}")
-print(f"{'='*60}")
-print(f"Is Phishing: {result['is_phishing']}")
-print(f"Risk Score: {result['risk_score']:.2f}/100")
-print(f"Classification: {result['classification']}")
-print(f"\nWarnings:")
-for warning in result['warnings']:
-    print(f"  - {warning}")
-print(f"{'='*60}\n")
-```
-
-## 🧩 Browser Extension
-
-### Installation
-
-1. Open Chrome/Edge and navigate to `chrome://extensions/`
+1. Open Chrome/Edge → `chrome://extensions/`
 2. Enable "Developer mode"
 3. Click "Load unpacked"
-4. Select the `browser_extension` directory
-5. The extension icon should appear in your toolbar
+4. Select `browser_extension/` folder
+5. Extension is now active!
 
-### Features
+**Features:**
+- Real-time URL checking
+- Automatic blocking of dangerous sites
+- Warning banners
+- Statistics dashboard
+- Configurable settings
 
-- ✅ Real-time URL checking on navigation
-- 🚨 Automatic blocking of high-risk sites
-- ⚠️ Warning banners for suspicious sites
-- 📊 Statistics dashboard
-- 🔔 Notifications for phishing attempts
-- ⚙️ Configurable settings
-- 🎯 Context menu integration
+## 🎓 Training ML Models
 
-### Configuration
+```bash
+# Quick training (default models)
+python train.py --collect-data
 
-1. Click the extension icon
-2. Click "Settings"
-3. Configure:
-   - API endpoint URL
-   - Risk threshold
-   - Auto-blocking
-   - Notifications
+# Train specific models
+python train.py --collect-data --models random_forest xgboost ensemble
 
-## 📊 Model Performance
+# With hyperparameter tuning
+python train.py --collect-data --tune --tune-model xgboost
 
-### Default Models
+# Cross-validation
+python train.py --collect-data --cross-validate --cv-folds 5
+```
 
-| Model | Accuracy | Precision | Recall | F1 Score | ROC AUC |
-|-------|----------|-----------|--------|----------|---------|
-| Random Forest | 0.96 | 0.95 | 0.97 | 0.96 | 0.98 |
-| XGBoost | 0.97 | 0.96 | 0.98 | 0.97 | 0.99 |
-| LightGBM | 0.97 | 0.97 | 0.97 | 0.97 | 0.99 |
-| Neural Network | 0.95 | 0.94 | 0.96 | 0.95 | 0.97 |
-| **Ensemble** | **0.98** | **0.97** | **0.98** | **0.98** | **0.99** |
+**Model Performance:**
+- Random Forest: 96% accuracy
+- XGBoost: 97% accuracy
+- LightGBM: 97% accuracy
+- Ensemble: **98% accuracy** ⭐
 
-### Feature Importance (Top 10)
-
-1. `has_ip_address` - 0.089
-2. `domain_age_months` - 0.067
-3. `has_https` - 0.058
-4. `url_length` - 0.052
-5. `has_suspicious_keyword` - 0.048
-6. `num_dots` - 0.045
-7. `has_valid_cert` - 0.042
-8. `is_shortened` - 0.038
-9. `domain_entropy` - 0.035
-10. `num_subdomain_parts` - 0.032
-
-## 🗂️ Project Structure
+## 🏗️ Project Structure
 
 ```
 Phisherman/
 ├── api/
-│   └── main.py                 # FastAPI REST API
-├── browser_extension/
-│   ├── manifest.json           # Extension manifest
-│   ├── background.js           # Background service worker
-│   ├── popup.html              # Extension popup UI
-│   ├── popup.js                # Popup logic
-│   ├── content.js              # Content script
-│   ├── options.html            # Settings page
-│   └── icons/                  # Extension icons
+│   └── main.py              # FastAPI server
+├── browser_extension/       # Chrome/Edge extension
 ├── src/
-│   ├── feature_extractor.py    # URL feature extraction
-│   ├── email_analyzer.py       # Email analysis
-│   ├── model_trainer.py        # Model training pipeline
-│   ├── phishing_detector.py    # Main detector class
-│   └── data_collector.py       # Data collection utilities
-├── models/                     # Trained models directory
-├── data/
-│   ├── raw/                    # Raw data
-│   └── processed/              # Processed datasets
-├── tests/                      # Unit tests
-├── notebooks/                  # Jupyter notebooks
-├── train.py                    # Training script
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+│   ├── feature_extractor.py # URL feature extraction
+│   ├── email_analyzer.py    # Email analysis
+│   ├── model_trainer.py     # ML training
+│   ├── phishing_detector.py # Main detector
+│   └── data_collector.py    # Data collection
+├── models/                  # Trained models
+├── data/                    # Training data
+├── tests/                   # Unit tests
+├── detect.py               # CLI tool
+├── train.py                # Training script
+├── setup.py                # Setup script
+└── requirements.txt        # Dependencies
 ```
 
 ## 🔧 Configuration
 
-### Environment Variables
-
-Create a `.env` file:
+Create `.env` file:
 
 ```bash
 # API Configuration
 API_HOST=0.0.0.0
 API_PORT=8000
-API_WORKERS=4
 
-# Model Configuration
+# Model Paths
 MODEL_PATH=models/best_model.pkl
 SCALER_PATH=models/best_model_scaler.pkl
-FEATURES_PATH=models/best_model_features.json
 
 # Detection Thresholds
 RISK_THRESHOLD=60
 BLOCK_THRESHOLD=80
-
-# Cache Settings
-CACHE_DURATION=3600
-```
-
-### API Configuration
-
-Edit `api/main.py` or use environment variables:
-
-```python
-CONFIG = {
-    'HOST': os.getenv('API_HOST', '0.0.0.0'),
-    'PORT': int(os.getenv('API_PORT', 8000)),
-    'WORKERS': int(os.getenv('API_WORKERS', 4)),
-}
 ```
 
 ## 🧪 Testing
@@ -432,165 +203,98 @@ CONFIG = {
 # Run all tests
 pytest tests/ -v
 
-# Run specific test file
-pytest tests/test_feature_extractor.py -v
-
-# Run with coverage
+# With coverage
 pytest --cov=src tests/
+
+# Test specific module
+pytest tests/test_feature_extractor.py
 ```
 
-## 📈 Performance Optimization
-
-### Model Optimization
-
-1. **Model Export to ONNX** (faster inference)
-```python
-import onnx
-import skl2onnx
-
-# Export model
-onnx_model = skl2onnx.convert_sklearn(model, initial_types=[...])
-```
-
-2. **Feature Caching**
-```python
-from functools import lru_cache
-
-@lru_cache(maxsize=1000)
-def extract_features(url):
-    # Feature extraction with caching
-    pass
-```
-
-3. **Batch Processing**
-```python
-# Process multiple URLs together
-results = detector.predict_batch(urls)
-```
-
-## 🛡️ Security Considerations
-
-1. **API Security**
-   - Implement rate limiting
-   - Add API authentication
-   - Use HTTPS in production
-   - Validate all inputs
-
-2. **Data Privacy**
-   - Don't log sensitive URLs
-   - Anonymize stored data
-   - Follow GDPR guidelines
-
-3. **Model Security**
-   - Protect model files
-   - Regular model updates
-   - Monitor for adversarial attacks
-
-## 🔄 Continuous Improvement
-
-### Update Training Data
+## 🐳 Docker Deployment
 
 ```bash
-# Collect new phishing samples
-python src/data_collector.py
+# Build and run
+docker-compose up -d
 
-# Retrain models
-python train.py --collect-data
+# Access API
+curl http://localhost:8000/health
 ```
 
-### Monitor Performance
+Services:
+- API: http://localhost:8000
+- MongoDB: localhost:27017
+- Redis: localhost:6379
+- Grafana: http://localhost:3000
 
+## 📊 Performance
+
+- **Response Time:** <100ms per URL
+- **Throughput:** 1000+ requests/second
+- **Accuracy:** 98% (ensemble model)
+- **False Positive Rate:** <2%
+
+## 🛡️ Security Features
+
+- SSL/TLS certificate validation
+- Domain reputation checking
+- WHOIS and DNS verification
+- Homograph attack detection
+- IP-based URL detection
+- Shortened URL detection
+- Brand impersonation detection
+- Form protection
+
+## 🔍 Troubleshooting
+
+### Issue: Module not found
 ```bash
-# Check API statistics
-curl http://localhost:8000/api/v1/stats
+python -m pip install -r requirements.txt
+```
 
-# View model info
-curl http://localhost:8000/api/v1/model/info
+### Issue: NLTK data missing
+```bash
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+```
+
+### Issue: API won't start
+```bash
+# Check dependencies
+python setup.py --verify
+
+# Install missing packages
+python -m pip install fastapi uvicorn
+```
+
+### Issue: Low accuracy
+```bash
+# Retrain models with more data
+python train.py --collect-data --models ensemble
 ```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+5. Open Pull Request
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
 - PhishTank for phishing URL data
 - OpenPhish for threat intelligence
 - scikit-learn, XGBoost, LightGBM communities
-- FastAPI framework
 
-## 📧 Contact
+## 📧 Support
 
-- **Author**: Your Name
-- **Email**: your.email@example.com
-- **GitHub**: [@yourusername](https://github.com/yourusername)
-
-## 🗺️ Roadmap
-
-- [ ] Deep learning models (LSTM, BERT)
-- [ ] Visual similarity detection
-- [ ] Browser screenshot analysis
-- [ ] Multi-language support
-- [ ] Mobile app (iOS/Android)
-- [ ] Integration with email clients
-- [ ] Real-time threat intelligence feeds
-- [ ] Automated model retraining pipeline
-- [ ] Dashboard for analytics
-- [ ] Webhook notifications
-
-## ⚠️ Disclaimer
-
-This tool is designed to help detect phishing attempts but should not be solely relied upon for security. Always practice safe browsing habits and verify suspicious content through official channels.
-
-## 📊 Metrics and Monitoring
-
-### Performance Metrics
-- Average response time: <100ms
-- Throughput: 1000+ requests/second
-- Model accuracy: 98%
-- False positive rate: <2%
-
-### API Endpoints Summary
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check |
-| `/api/v1/analyze/url` | POST | Analyze single URL |
-| `/api/v1/analyze/batch` | POST | Analyze multiple URLs |
-| `/api/v1/analyze/email` | POST | Analyze email |
-| `/api/v1/analyze/comprehensive` | POST | Detailed URL analysis |
-| `/api/v1/model/info` | GET | Model information |
-| `/api/v1/stats` | GET | Usage statistics |
+- **Issues:** GitHub Issues
+- **Discussions:** GitHub Discussions
+- **Email:** your.email@example.com
 
 ---
 
 **Made with ❤️ for a safer internet**
----
-
-## ⚠️ IMPORTANT: Disk Space & Installation
-
-### 💾 Running Out of Disk Space?
-
-**Use the lightweight core requirements instead!**
-
-```bash
-# Clear pip cache first (saves 3-4GB)
-pip cache purge
-
-# Install core requirements only (200MB instead of 2GB)
-pip install --break-system-packages -r requirements-core.txt --no-cache-dir
-```
-
-**Why?** The full `requirements.txt` includes CUDA packages (2-3GB) that are NOT needed for phishing detection!
-
-See [DISK_SPACE_FIX.md](DISK_SPACE_FIX.md) for complete details.
-
----
